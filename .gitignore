@@ -90,7 +90,7 @@ ipython_config.py
 #   having no cross-platform support, pipenv may install dependencies that don't work, or not
 #   install all needed dependencies.
 # Pipfile.lock
-.stats
+
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow
 __pypackages__/
@@ -130,6 +130,7 @@ dmypy.json
 .pyre/
 
 # ADDS
-tester.py
+test.py
 .key
 .db
+.stats
