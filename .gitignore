@@ -131,6 +131,6 @@ dmypy.json
 
 # ADDS
 test.py
-.key
-.db
-.stats
+*.key
+*.db
+*.stats
