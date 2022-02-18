@@ -1,4 +1,3 @@
-import random
 import string
 import sys
 
@@ -35,22 +34,51 @@ def get_all():
         return accounts
 
 
-def generate_password(response, min_len, max_len):
-    password_characters = ""
-    lower_letters = string.ascii_lowercase
-    upper_letters = string.ascii_uppercase
-    numbers = string.digits
-    punctuations = "~!@#$%^&*()_-+={}[]|:;,<>.?"
-    options = [lower_letters, upper_letters, numbers, punctuations]
-    random_len = random.randint(min_len, max_len)
+def generate_password(response, char_len):
+    # password_characters = ""
+    # lower_letters = string.ascii_lowercase
+    # upper_letters = string.ascii_uppercase
+    # numbers = string.digits
+    # punctuations = "~!@#$%^&*()_-+={}[]|:;,<>.?"
+    # options = [lower_letters, upper_letters, numbers, punctuations]
+    # random_len = random.randint(min_len, max_len)
 
-    for res in enumerate(response):
-        if res[1] == "y":
-            password_characters = password_characters + options[res[0]]
-    generated_password = "".join(
-        (random.choice(password_characters) for i in range(random_len))
-    )
-    print(generate_password)
+    # for res in enumerate(response):
+    # if res[1] == "y":
+    # password_characters = password_characters + options[res[0]]
+    # generated_password = "".join(
+    # (random.choice(password_characters) for i in range(random_len))
+    # )
+    # print(generate_password)
+    pass
+
+
+def get_password_options(char_len):
+    questions = [
+        "Include uppercase? (y/n): ",
+        "include digits? (y/n): ",
+        "include specail characters? (y/n): ",
+    ]
+    selected = [
+        "y",
+    ]
+    response = ""
+
+    for question in questions:
+        while response not in list("yn"):
+            response = input(question)
+        selected.append(response)
+        response = ""
+
+    while True:
+        try:
+            char_len = int(input("Character length?: "))
+        except ValueError:
+            print("Invalid input...")
+        else:
+            break
+
+    print(selected, char_len)
 
 
 def controller(keyword, user_password):
@@ -61,39 +89,7 @@ def controller(keyword, user_password):
         elif keyword == "-e":
             print("export")
         elif keyword == "-g":
-            options = "yn"
-            response = "y"
-            res = "x"
-            valid_input = False
-            min_len = 8
-            max_len = 16
-            while res not in options:
-                res = input("include uppercase? y/n: ")
-            response = response + res
-            res = "x"
-            while res not in options:
-                res = input("include numbers? y/n: ")
-            response = response + res
-            res = "x"
-            while res not in options:
-                res = input("include special characters? y/n: ")
-            response = response + res
-            while not valid_input:
-                try:
-                    min_len = int(input("Min length?: "))
-                except ValueError as error:
-                    print("Invalid input")
-                else:
-                    valid_input = True
-            valid_input = False
-            while not valid_input:
-                try:
-                    min_len = int(input("Max length?: "))
-                except ValueError as error:
-                    print("Invalid input")
-                else:
-                    valid_input = True
-            generate_password(response, min_len, max_len)
+            get_password_options(char_len=8)
         elif keyword == "-i":
             print("import")
         elif keyword == "-sa":
