@@ -35,12 +35,22 @@ def get_all():
         return accounts
 
 
-def generate_password():
+def generate_password(response, min_len, max_len):
     password_characters = ""
     lower_letters = string.ascii_lowercase
     upper_letters = string.ascii_uppercase
     numbers = string.digits
     punctuations = "~!@#$%^&*()_-+={}[]|:;,<>.?"
+    options = [lower_letters, upper_letters, numbers, punctuations]
+    random_len = random.randint(min_len, max_len)
+
+    for res in enumerate(response):
+        if res[1] == "y":
+            password_characters = password_characters + options[res[0]]
+    generated_password = "".join(
+        (random.choice(password_characters) for i in range(random_len))
+    )
+    print(generate_password)
 
 
 def controller(keyword, user_password):
@@ -51,8 +61,39 @@ def controller(keyword, user_password):
         elif keyword == "-e":
             print("export")
         elif keyword == "-g":
-            options = ""
-            options = options + input("Inlcude all lowercase y/n")
+            options = "yn"
+            response = "y"
+            res = "x"
+            valid_input = False
+            min_len = 8
+            max_len = 16
+            while res not in options:
+                res = input("include uppercase? y/n: ")
+            response = response + res
+            res = "x"
+            while res not in options:
+                res = input("include numbers? y/n: ")
+            response = response + res
+            res = "x"
+            while res not in options:
+                res = input("include special characters? y/n: ")
+            response = response + res
+            while not valid_input:
+                try:
+                    min_len = int(input("Min length?: "))
+                except ValueError as error:
+                    print("Invalid input")
+                else:
+                    valid_input = True
+            valid_input = False
+            while not valid_input:
+                try:
+                    min_len = int(input("Max length?: "))
+                except ValueError as error:
+                    print("Invalid input")
+                else:
+                    valid_input = True
+            generate_password(response, min_len, max_len)
         elif keyword == "-i":
             print("import")
         elif keyword == "-sa":
