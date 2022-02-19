@@ -1,9 +1,11 @@
+import random
 import string
 import sys
 
 import stash_database as sd
 import stash_encryption as se
 import stash_setup as ss
+import stash_view as sv
 from clear import clear
 
 
@@ -15,6 +17,24 @@ def check_authentication(user_password):
         is_allowed = True
 
     return is_allowed
+
+
+def generate_password(selected, char_len):
+    password_characters = ""
+    lower_letters = string.ascii_lowercase
+    upper_letters = string.ascii_uppercase
+    numbers = string.digits
+    punctuations = "~!@#$%^&*()_-+={}[]|:;,<>.?"
+    options = [lower_letters, upper_letters, numbers, punctuations]
+
+    for res in enumerate(selected):
+        if res[1] == "y":
+            password_characters = password_characters + options[res[0]]
+
+    generated_password = "".join(
+        (random.choice(password_characters) for i in range(char_len))
+    )
+    return generated_password
 
 
 def search_keyword(keyword):
@@ -34,86 +54,71 @@ def get_all():
         return accounts
 
 
-def generate_password(response, char_len):
-    # password_characters = ""
-    # lower_letters = string.ascii_lowercase
-    # upper_letters = string.ascii_uppercase
-    # numbers = string.digits
-    # punctuations = "~!@#$%^&*()_-+={}[]|:;,<>.?"
-    # options = [lower_letters, upper_letters, numbers, punctuations]
-    # random_len = random.randint(min_len, max_len)
+def add_account(account_details):
+    keyword = account_details[0]
+    details = search_keyword(keyword)
+    if not details:
+        password = se.encrypt_password(account_details[2])
+        account_details[2] = password
+        is_inserted = sd.insert_account(account_details)
+        if is_inserted is not None:
+            details = search_keyword(keyword)
+            password = se.decrypt_password(details[2])
+            details = list(details)
+            details[2] = password
+            sv.show_result_from_keyword(details, keyword, error="Account added...")
+    else:
+        password = se.decrypt_password(details[2])
+        details = list(details)
+        details[2] = password
+        sv.show_result_from_keyword(details, keyword, error="Account already exist...")
 
-    # for res in enumerate(response):
-    # if res[1] == "y":
-    # password_characters = password_characters + options[res[0]]
-    # generated_password = "".join(
-    # (random.choice(password_characters) for i in range(random_len))
-    # )
-    # print(generate_password)
+
+def edit_account(account_id):
+    option = sv.choose_to_edit()
     pass
 
 
-def get_password_options(char_len):
-    questions = [
-        "Include uppercase? (y/n): ",
-        "include digits? (y/n): ",
-        "include specail characters? (y/n): ",
-    ]
-    selected = [
-        "y",
-    ]
-    response = ""
-
-    for question in questions:
-        while response not in list("yn"):
-            response = input(question)
-        selected.append(response)
-        response = ""
-
-    while True:
-        try:
-            char_len = int(input("Character length?: "))
-        except ValueError:
-            print("Invalid input...")
-        else:
-            break
-
-    print(selected, char_len)
+def after_search_action(account_id, option):
+    if option == "e":
+        keyword = edit_account(account_id)
+    elif option == "d":
+        pass
+    elif option == "q":
+        quit()
 
 
 def controller(keyword, user_password):
     is_allowed = check_authentication(user_password)
     if is_allowed:
         if keyword == "-a":
-            print("add")
+            account_details = sv.get_account_details()
+            add_account(account_details)
         elif keyword == "-e":
             print("export")
-        elif keyword == "-g":
-            get_password_options(char_len=8)
         elif keyword == "-i":
             print("import")
         elif keyword == "-sa":
             accounts = get_all()
             if not accounts:
-                print("Database is empty")
+                sv.show_all_results(accounts)
             else:
-                print("Keyword  | Username  | Password")
-                for account in accounts:
-                    keyword, username, e_password = account
-                    password = se.decrypt_password(e_password)
-                    print(f"{keyword} | {username} | {password}")
+                for account in enumerate(accounts):
+                    password = se.decrypt_password(account[1][2])
+                    account_details = list(account[1])
+                    account_details[2] = password
+                    accounts[account[0]] = account_details
+
+                sv.show_all_results(accounts)
         else:
             details = search_keyword(keyword)
             if not details:
-                print(f"{keyword} not found")
+                sv.show_result_from_keyword(details, keyword)
             else:
-                account_id, username, e_password = details
-                password = se.decrypt_password(e_password)
-                print(f"{keyword}")
-                print(f"username: {username}\npassword: {password}")
-                print("\ncopy [u]sername || copy [p]assword")
-                print("[e]dit || [d]elete\n")
-                print(account_id)
+                password = se.decrypt_password(details[2])
+                details = list(details)
+                details[2] = password
+                sv.show_result_from_keyword(details, keyword)
     else:
         print("Invalid password...")
 
@@ -124,21 +129,12 @@ def check_args(is_valid):
             clear()
             controller(sys.argv[1], sys.argv[2])
         else:
-            clear()
-            print(
-                "Created required files...\
-                    \nRun python stash.py <keyword> <password>"
-            )
+            sv.files_created(with_error=False)
     else:
         if is_valid:
-            clear()
-            print("Invalid... \nRun python stash.py <keyword> <password>")
+            sv.files_created(with_error=True)
         else:
-            clear()
-            print(
-                "Created required files...\
-                    \nRun python stash.py <keyword> <password>"
-            )
+            sv.files_created(with_error=False)
 
 
 if __name__ == "__main__":

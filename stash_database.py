@@ -36,3 +36,24 @@ def get_all_accounts():
         accounts = cursor.fetchall()
 
         return accounts
+
+
+def insert_account(account_details):
+    keyword, username, password = account_details
+
+    with sqlite3.connect("stash.db") as conn:
+        query = """insert into accounts\
+                (keyword, username, password, sync_status)\
+                values(?, ?, ?, ?)"""
+        cursor = conn.cursor()
+        is_inserted = cursor.execute(
+            query,
+            (
+                keyword,
+                username,
+                password,
+                1,
+            ),
+        )
+
+    return is_inserted

@@ -39,6 +39,14 @@ def decrypt_user_key():
     return user_key
 
 
+def encrypt_password(user_password):
+    key = get_encryption_key()
+    fe = Fernet(key)
+    password = fe.encrypt(user_password.encode())
+
+    return password
+
+
 def decrypt_password(e_password):
     key = get_encryption_key()
     fe = Fernet(key)
